@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    image: ${IMAGE_NAME:-fde-portfolio}:${TAG:-dev}
+    container_name: fde-portfolio-api
+    ports:
+      - "8000:8000"
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-dev}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    restart: unless-stopped

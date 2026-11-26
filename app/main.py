@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 from . import __version__
 from .config import Settings, get_settings
@@ -87,6 +88,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         """Baseline typed endpoint; week 2 replaces dict with Pydantic models
         and wires it to an LLM call."""
         return {"received": payload, "count": len(payload)}
+
+    class workCountRequest(BaseModel):
+        text: str
+
+    @app.post("/v1/wordcount", tags=["baseline"])
+    async def wordcount(payload: workCountRequest) -> dict[str, int]:
+        return {"count": len(payload.text.split())}
 
     return app
 

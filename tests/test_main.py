@@ -9,14 +9,18 @@ from fastapi.testclient import TestClient
 from app.config import Settings
 from app.main import create_app
 
-client = TestClient(create_app(Settings(environment="test")))
+# _env_file=None 隔离本地 .env：测试不依赖开发者机器上的配置。
+# 显式写死测试关心的字段（app_name/environment），断言与注入值一致。
+client = TestClient(
+    create_app(Settings(_env_file=None, app_name="Test Service", environment="test"))
+)
 
 
 def test_root():
     res = client.get("/")
     assert res.status_code == 200
     body = res.json()
-    assert body["service"] == "FDE Portfolio Service"
+    assert body["service"] == "Test Service"
     assert body["environment"] == "test"
     assert "version" in body
 
@@ -48,3 +52,8 @@ def test_request_id_header():
 
 def test_unknown_route():
     assert client.get("/does-not-exist").status_code == 404
+
+def test_wordcount():
+    res = client.post("/v1/wordcount", json={"text": "I'm your daddy!"})
+    assert res.status_code == 200
+    assert res.json()["count"]== 3
